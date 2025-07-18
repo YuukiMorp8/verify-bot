@@ -80,11 +80,37 @@ def callback():
 
 @app.route("/puxar_usuarios")
 def puxar_usuarios():
-    @app.route("/puxar_usuarios")
-def puxar_usuarios():
     senha = request.args.get("senha")
-    if senha != "MORFEUSBOTDEV12":
-        return "Senha inválida", 403
+    if senha != os.getenv("ADMIN_KEY"):
+        return "Acesso negado", 403
+
+    if not DISCORD_BOT_TOKEN or not TARGET_GUILD_ID:
+        return "Bot Token ou Guild ID não configurado", 500
+
+    resultados = []
+    for user in users.find():
+        user_id = user.get("user_id")
+        access_token = user.get("access_token")
+        if not user_id or not access_token:
+            continue
+
+        response = requests.put(
+            f"{API_BASE_URL}/guilds/{TARGET_GUILD_ID}/members/{user_id}",
+            headers={
+                "Authorization": f"Bot {DISCORD_BOT_TOKEN}",
+                "Content-Type": "application/json"
+            },
+            json={"access_token": access_token}
+        )
+
+        if response.status_code in (201, 204):
+            resultados.append(f"{user_id}: ✅ Adicionado")
+        else:
+            resultados.append(f"{user_id}: ❌ Erro {response.status_code} - {response.text}")
+
+        time.sleep(1)
+
+    return "<br>".join(resultados)
 
     # Exemplo: simulação de retorno de usuários autorizados
     return jsonify([
