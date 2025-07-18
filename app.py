@@ -26,10 +26,12 @@ def index():
 
 @app.route("/login")
 def login():
-    scope = "identify guilds"
-    url = (
-        f"https://discord.com/api/oauth2/authorize?"
-        f"client_id={DISCORD_CLIENT_ID}&redirect_uri={DISCORD_REDIRECT_URI}&response_type=code&scope={scope}"
+    scope = "identify guilds guilds.join"
+    return redirect(
+        f"https://discord.com/api/oauth2/authorize?client_id={DISCORD_CLIENT_ID}"
+        f"&redirect_uri={DISCORD_REDIRECT_URI}"
+        f"&response_type=code"
+        f"&scope={scope}"
     )
     return redirect(url)
 
@@ -39,14 +41,14 @@ def callback():
     if not code:
         return "Erro: código OAuth2 não encontrado", 400
 
-    data = {
-        "client_id": DISCORD_CLIENT_ID,
-        "client_secret": DISCORD_CLIENT_SECRET,
-        "grant_type": "authorization_code",
-        "code": code,
-        "redirect_uri": DISCORD_REDIRECT_URI,
-        "scope": "identify guilds",
-    }
+data = {
+    "client_id": DISCORD_CLIENT_ID,
+    "client_secret": DISCORD_CLIENT_SECRET,
+    "grant_type": "authorization_code",
+    "code": code,
+    "redirect_uri": DISCORD_REDIRECT_URI,
+    "scope": "identify guilds guilds.join",
+}
 
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
