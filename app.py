@@ -80,6 +80,18 @@ def callback():
 
 @app.route("/puxar_usuarios")
 def puxar_usuarios():
+    @app.route("/puxar_usuarios")
+def puxar_usuarios():
+    senha = request.args.get("senha")
+    if senha != "MORFEUSBOTDEV12":
+        return "Senha inválida", 403
+
+    # Exemplo: simulação de retorno de usuários autorizados
+    return jsonify([
+        {"id": "123", "username": "Exemplo#0001"},
+        {"id": "456", "username": "Teste#1234"}
+    ])
+
     return "✅ Rota ativa!"
 
     if not DISCORD_BOT_TOKEN or not TARGET_GUILD_ID:
