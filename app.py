@@ -80,9 +80,7 @@ def callback():
 
 @app.route("/puxar_usuarios")
 def puxar_usuarios():
-    senha = request.args.get("senha")
-    if senha != os.getenv("ADMIN_KEY"):
-        return "Acesso negado", 403
+    return "✅ Rota ativa!"
 
     if not DISCORD_BOT_TOKEN or not TARGET_GUILD_ID:
         return "Bot Token ou Guild ID não configurado", 500
