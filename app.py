@@ -27,13 +27,18 @@ def index():
 
 @app.route("/login")
 def login():
+    SCOPE = "identify guilds bot"
+    PERMISSIONS = "8"  # Exemplo: Admin (ou use 0 para nenhuma permissão extra)
+    
     return redirect(
-        f"https://discord.com/api/oauth2/authorize?client_id={DISCORD_CLIENT_ID}"
+        f"https://discord.com/api/oauth2/authorize?"
+        f"client_id={DISCORD_CLIENT_ID}"
         f"&redirect_uri={DISCORD_REDIRECT_URI}"
         f"&response_type=code"
         f"&scope={SCOPE}"
+        f"&permissions={PERMISSIONS}"
     )
-
+    
 @app.route("/callback")
 def callback():
     code = request.args.get("code")
@@ -46,7 +51,7 @@ def callback():
         "grant_type": "authorization_code",
         "code": code,
         "redirect_uri": DISCORD_REDIRECT_URI,
-        "scope": SCOPE,
+        "scope": "indentify guilds guilds.join" ,
     }
 
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
