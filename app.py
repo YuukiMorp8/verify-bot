@@ -19,6 +19,7 @@ db = client["verifybot"]
 users = db["users"]
 
 API_BASE_URL = "https://discord.com/api"
+SCOPE = "identify guilds guilds.join"
 
 @app.route("/")
 def index():
@@ -32,7 +33,6 @@ def login():
         f"&response_type=code"
         f"&scope={SCOPE}"
     )
-    return redirect(url)
 
 @app.route("/callback")
 def callback():
@@ -46,7 +46,7 @@ def callback():
         "grant_type": "authorization_code",
         "code": code,
         "redirect_uri": DISCORD_REDIRECT_URI,
-        "scope": identify guilds guilds.join,
+        "scope": SCOPE,
     }
 
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -59,9 +59,14 @@ def callback():
     user_response.raise_for_status()
     user_data = user_response.json()
 
+    # Salvar dados do usuário no MongoDB
     users.update_one(
         {"user_id": user_data["id"]},
-        {"$set": user_data},
+        {"$set": {
+            "user_id": user_data["id"],
+            "username": f'{user_data["username"]}#{user_data["discriminator"]}',
+            "avatar": user_data.get("avatar"),
+        }},
         upsert=True
     )
 
