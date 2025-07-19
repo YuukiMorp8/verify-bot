@@ -20,9 +20,7 @@ MONGO_URI = os.getenv("MONGO_URI")
 client = MongoClient(MONGO_URI)
 db = client["verifybot"]
 users = db["users"]
-
 API_BASE_URL = "https://discord.com/api"
-SCOPE = "identify guilds guilds.join"
 
 @app.route("/")
 def index():
@@ -36,11 +34,8 @@ def login():
         f"client_id={DISCORD_CLIENT_ID}"
         f"&redirect_uri={DISCORD_REDIRECT_URI}"
         f"&response_type=code"
+        f"&scope={SCOPE}"
     )
-    
-headers = {"Content-Type": "application/x-www-form-urlencoded"}
-
-token_response = requests.post(f"{API_BASE_URL}/oauth2/token", data=data, headers=headers)
 
 @app.route("/callback")
 def callback():
@@ -54,13 +49,16 @@ def callback():
         "grant_type": "authorization_code",
         "code": code,
         "redirect_uri": DISCORD_REDIRECT_URI,
-        "scope": "identify guilds guilds.join",
     }
 
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
     token_response = requests.post(f"{API_BASE_URL}/oauth2/token", data=data, headers=headers)
-    token_response.raise_for_status()
+    try:
+        token_response.raise_for_status()
+    except Exception as e:
+        return f"Erro ao obter token: {e}, resposta: {token_response.text}", 500
+
     tokens = token_response.json()
     access_token = tokens.get("access_token")
 
@@ -115,41 +113,6 @@ def puxar_usuarios():
 
     return "<br>".join(resultados)
 
-    # Exemplo: simulação de retorno de usuários autorizados
-    return jsonify([
-        {"id": "123", "username": "Exemplo#0001"},
-        {"id": "456", "username": "Teste#1234"}
-    ])
-
-    return "✅ Rota ativa!"
-
-    if not DISCORD_BOT_TOKEN or not TARGET_GUILD_ID:
-        return "Bot Token ou Guild ID não configurado", 500
-
-    resultados = []
-    for user in users.find():
-        user_id = user.get("user_id")
-        access_token = user.get("access_token")
-        if not user_id or not access_token:
-            continue
-
-        response = requests.put(
-            f"{API_BASE_URL}/guilds/{TARGET_GUILD_ID}/members/{user_id}",
-            headers={
-                "Authorization": f"Bot {DISCORD_BOT_TOKEN}",
-                "Content-Type": "application/json"
-            },
-            json={"access_token": access_token}
-        )
-
-        if response.status_code in (201, 204):
-            resultados.append(f"{user_id}: ✅ Adicionado")
-        else:
-            resultados.append(f"{user_id}: ❌ Erro {response.status_code} - {response.text}")
-
-        time.sleep(1)
-
-    return "<br>".join(resultados)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
