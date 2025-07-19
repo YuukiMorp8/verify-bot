@@ -36,8 +36,11 @@ def login():
         f"client_id={DISCORD_CLIENT_ID}"
         f"&redirect_uri={DISCORD_REDIRECT_URI}"
         f"&response_type=code"
-        f"&scope={SCOPE}"
     )
+    
+headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
+token_response = requests.post(f"{API_BASE_URL}/oauth2/token", data=data, headers=headers)
 
 @app.route("/callback")
 def callback():
